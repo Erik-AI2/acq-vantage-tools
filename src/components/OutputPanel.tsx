@@ -231,15 +231,6 @@ export function OutputPanel({ type, output, onOutputChange, model, width, itemId
       return null
     }
 
-    function isHeaderLine(line: string): boolean {
-      const trimmed = line.trim()
-      // Decorative separator lines
-      if (/^[═─━─╌╍┄┅]+$/.test(trimmed)) return true
-      // Empty
-      if (trimmed === '') return true
-      return false
-    }
-
     let currentSection: string | null = null
     let currentLines: string[] = []
     let prevWasSeparator = false

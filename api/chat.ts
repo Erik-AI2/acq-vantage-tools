@@ -1,0 +1,73 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node'
+import Anthropic from '@anthropic-ai/sdk'
+import { readFileSync } from 'fs'
+import { join } from 'path'
+
+const client = new Anthropic()
+
+const promptsDir = join(process.cwd(), 'server', 'prompts')
+const orchestrator = readFileSync(join(promptsDir, 'chat-orchestrator.md'), 'utf-8')
+const toolPrompts: Record<string, string> = {
+  offer: readFileSync(join(promptsDir, 'offer-system.md'), 'utf-8'),
+  script: readFileSync(join(promptsDir, 'script-system.md'), 'utf-8'),
+  vsl: readFileSync(join(promptsDir, 'vsl-system.md'), 'utf-8'),
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' })
+    return
+  }
+
+  const { tool, chat_history, user_message, model } = req.body
+
+  if (!tool || !user_message) {
+    res.status(400).json({ error: 'Missing tool or user_message' })
+    return
+  }
+
+  const toolPrompt = toolPrompts[tool]
+  if (!toolPrompt) {
+    res.status(400).json({ error: `Unknown tool: ${tool}` })
+    return
+  }
+
+  const systemPrompt = `${orchestrator}\n\n---\n\n# FRAMEWORK KNOWLEDGE\n\n${toolPrompt}`
+
+  const messages: Anthropic.MessageParam[] = [
+    ...(chat_history || []),
+    { role: 'user', content: user_message },
+  ]
+
+  const MODEL_MAP: Record<string, string> = {
+    sonnet: 'claude-sonnet-4-6',
+    opus: 'claude-opus-4-6',
+  }
+  const modelId = MODEL_MAP[model] || 'claude-sonnet-4-6'
+
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
+
+  try {
+    const stream = await client.messages.stream({
+      model: modelId,
+      max_tokens: 4096,
+      system: systemPrompt,
+      messages,
+    })
+
+    for await (const event of stream) {
+      if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+        res.write(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`)
+      }
+    }
+
+    res.write('data: [DONE]\n\n')
+    res.end()
+  } catch (error: any) {
+    console.error('Chat error:', error.message)
+    res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`)
+    res.end()
+  }
+}

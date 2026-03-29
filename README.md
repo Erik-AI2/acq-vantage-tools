@@ -1,73 +1,77 @@
-# React + TypeScript + Vite
+# ACQ Vantage AI Tools
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+AI-powered business tools built on Alex Hormozi's public frameworks. Three working tools that guide users through structured interviews and produce execution-ready outputs.
 
-Currently, two official plugins are available:
+**Live demo:** [Coming soon]
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tools
 
-## React Compiler
+- **Offer Creator** — Guided interview that builds a Grand Slam Offer using the Value Equation framework ($100M Offers)
+- **Sales Script Builder** — Builds complete sales scripts using the CLOSER framework with objection handling
+- **VSL Generator** — Creates Video Sales Letter scripts with hook, problem, credibility, mechanism, value stack, risk reversal, and CTA
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## How It Works
 
-## Expanding the ESLint configuration
+Each tool runs as a chat-based interview. The AI asks questions one at a time, shapes answers into structured sections, and produces a complete document. Users can:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Follow the guided conversation or paste a complete draft
+- Edit individual sections in the output panel
+- Run an AI audit that scores the draft against framework dimensions
+- Bridge from a completed offer directly into a script or VSL
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Frontend:** React 18 + TypeScript + Tailwind CSS v4 + Vite 8
+- **Backend:** Vercel Serverless Functions (Express for local dev)
+- **AI:** Claude API (Sonnet 4.6 default, Opus 4.6 premium) via SSE streaming
+- **Database:** Supabase (items, messages, audits)
+- **Prompts:** 6 system prompts (~1,200 lines total) encoding interview flows, scoring rubrics, and framework knowledge
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Architecture
+
+```
+Frontend (React + Vite)
+  ├── Sidebar (saved items, create/delete, model toggle)
+  ├── Chat (SSE streaming, blockquote/list/bold rendering)
+  ├── OutputPanel (Edit/Preview tabs, Paste All, Audit Scorecard)
+  └── Roadmap (24 planned features across 4 categories)
+
+API (Vercel Serverless)
+  ├── POST /api/chat → Claude SSE stream
+  └── POST /api/audit → Claude SSE stream (scoring)
+
+Database (Supabase)
+  ├── items (id, type, name, output, timestamps)
+  ├── messages (item_id, role, content)
+  └── audits (item_id, content)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Local Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Install dependencies
+npm install
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Create .env with your API key
+echo "ANTHROPIC_API_KEY=your-key-here" > .env
+
+# Run dev server (frontend + backend)
+npm run dev
 ```
+
+Frontend: http://localhost:5173
+Backend: http://localhost:3001
+
+## Deployment
+
+Deployed on Vercel. Set `ANTHROPIC_API_KEY` as an environment variable in the Vercel dashboard.
+
+## Prompt Engineering
+
+The real work is in `server/prompts/`. Each prompt encodes:
+- Interview sequences with per-step instructions
+- Framework knowledge from public sources ($100M Offers, $100M Leads, $100M Money Models)
+- Scoring rubrics with dimension-specific criteria
+- Output formatting rules for paste parsing
+
+All frameworks are sourced from publicly available books and content.

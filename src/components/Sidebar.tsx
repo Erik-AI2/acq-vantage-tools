@@ -35,7 +35,7 @@ export function Sidebar({ activeId, items, onSelect, onNew, onDelete, model, onM
     }
   }
 
-  function renderGroup(title: string, groupItems: SavedItem[], type: ToolType) {
+  function renderGroup(title: string, groupItems: SavedItem[], _type: ToolType) {
     return (
       <div>
         <p className="text-[9px] uppercase tracking-[0.15em] text-white/15 px-2 mb-1.5 font-medium">{title}</p>
