@@ -1,69 +1,136 @@
-import type { Message, ToolType } from './chat'
+import { createClient } from '@supabase/supabase-js'
+import type { ToolType } from './chat'
+
+const supabase = createClient(
+  'https://ioanyldicahtiddvarop.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlvYW55bGRpY2FodGlkZHZhcm9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDI1MDMsImV4cCI6MjA5MDM3ODUwM30.42HgP6URhQnYoJK10lL_VNLT0uUf7cXszHGV2Pi43HI'
+)
+
+// ---------- Types ----------
 
 export interface SavedItem {
   id: string
   type: ToolType
   name: string
-  chat_history: Message[]
   output: Record<string, string>
-  audit: string | null
   created_at: string
   updated_at: string
 }
 
-const STORAGE_KEY = 'acq-vantage-items'
-
-function generateId(): string {
-  return crypto.randomUUID()
+export interface MessageRow {
+  id: string
+  item_id: string
+  role: 'user' | 'assistant'
+  content: string
+  created_at: string
 }
 
-export function getItems(): SavedItem[] {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  return raw ? JSON.parse(raw) : []
+export interface AuditRow {
+  id: string
+  item_id: string
+  content: string
+  created_at: string
 }
 
-export function getItem(id: string): SavedItem | undefined {
-  return getItems().find(item => item.id === id)
+// ---------- Items ----------
+
+export async function getItems(): Promise<SavedItem[]> {
+  const { data, error } = await supabase
+    .from('items')
+    .select('*')
+    .order('updated_at', { ascending: false })
+  if (error) throw error
+  return data as SavedItem[]
 }
 
-export function saveItem(item: SavedItem): void {
-  const items = getItems()
-  const index = items.findIndex(i => i.id === item.id)
-  item.updated_at = new Date().toISOString()
-  if (index >= 0) {
-    items[index] = item
-  } else {
-    items.push(item)
-  }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+export async function getItem(id: string): Promise<SavedItem | undefined> {
+  const { data, error } = await supabase
+    .from('items')
+    .select('*')
+    .eq('id', id)
+    .single()
+  if (error) return undefined
+  return data as SavedItem
 }
 
-export function createItem(type: ToolType, name: string): SavedItem {
-  const item: SavedItem = {
-    id: generateId(),
-    type,
-    name,
-    chat_history: [],
-    output: {},
-    audit: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  }
-  saveItem(item)
-  return item
+export async function createItem(type: ToolType, name: string): Promise<SavedItem> {
+  const { data, error } = await supabase
+    .from('items')
+    .insert({ type, name, output: {} })
+    .select()
+    .single()
+  if (error) throw error
+  return data as SavedItem
 }
 
-export function deleteItem(id: string): void {
-  const items = getItems().filter(i => i.id !== id)
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+export async function updateItem(id: string, fields: Partial<Pick<SavedItem, 'name' | 'output'>>): Promise<void> {
+  const { error } = await supabase
+    .from('items')
+    .update(fields)
+    .eq('id', id)
+  if (error) throw error
 }
+
+export async function deleteItem(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('items')
+    .delete()
+    .eq('id', id)
+  if (error) throw error
+}
+
+// ---------- Messages ----------
+
+export async function getMessages(itemId: string): Promise<MessageRow[]> {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('item_id', itemId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return data as MessageRow[]
+}
+
+export async function addMessage(itemId: string, role: 'user' | 'assistant', content: string): Promise<MessageRow> {
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({ item_id: itemId, role, content })
+    .select()
+    .single()
+  if (error) throw error
+  return data as MessageRow
+}
+
+// ---------- Audits ----------
+
+export async function getAudits(itemId: string): Promise<AuditRow[]> {
+  const { data, error } = await supabase
+    .from('audits')
+    .select('*')
+    .eq('item_id', itemId)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data as AuditRow[]
+}
+
+export async function addAudit(itemId: string, content: string): Promise<AuditRow> {
+  const { data, error } = await supabase
+    .from('audits')
+    .insert({ item_id: itemId, content })
+    .select()
+    .single()
+  if (error) throw error
+  return data as AuditRow
+}
+
+// ---------- Output Sections (static, no DB) ----------
 
 export function getOutputSections(type: ToolType): string[] {
   switch (type) {
     case 'offer':
       return ['Offer Name', 'Dream Outcome', 'Target Market', 'Problems We Solve', 'Mechanism', 'Value Stack', 'Proof', 'Price', 'Guarantee', 'Scarcity', 'Call to Action']
     case 'script':
-      return ['Context', 'Channel', 'Opener', 'Clarify', 'Label', 'Overview', 'Value Presentation', 'Price Reveal', 'Objection Handling', 'Close', 'Reinforce', 'Follow-Up']
+      return ['Opener', 'Pain Discovery', 'Demo Script', 'Value Stack & Price', 'Objections & Rebuttals', 'Close', 'Follow-Up', 'Special Pitch']
     case 'vsl':
       return ['Hook', 'Problem', 'Credibility', 'Mechanism', 'Value Stack', 'Risk Reversal', 'CTA']
     default:

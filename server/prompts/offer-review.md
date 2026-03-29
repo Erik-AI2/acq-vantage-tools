@@ -29,7 +29,7 @@ Value = (Dream Outcome × Perceived Likelihood) / (Time Delay × Effort & Sacrif
 | 8 | **Guarantee** | Guarantee chapter. Formula: "If you do not get [X result] in [Y time], we will [Z action]." Types: unconditional, conditional, anti, implied, stacked. | Does it remove perceived risk? Outcome-based? Named memorably? | No guarantee at all | Generic "satisfaction guaranteed" or vague | Outcome-based with timeline, clear type (conditional/unconditional) | Stacked guarantees, memorable name, addresses specific fear, math works |
 | 9 | **Scarcity & Urgency** | Scarcity chapter. "Always sell out. Always let people know you sold out." Urgency: "50-60% of sales happen in last 3% of time." | Real constraints? Never fake? | Fake urgency or none at all | Generic "limited spots" without specifics | Real constraint with specific number/date | Real, specific, with believable reason, proven to drive action |
 
-### Pricing Dimensions (Source: $100M Pricing Playbook)
+### Pricing Dimensions (Source: $100M Offers, pricing chapter)
 
 | # | Dimension | Source Framework | What to check | 1-3 | 4-6 | 7-8 | 9-10 |
 |---|-----------|----------------|---------------|-----|-----|-----|------|
@@ -63,46 +63,31 @@ These are explicitly against the frameworks. Flag if found:
 
 ## OUTPUT FORMAT
 
-Return JSON:
+Return ONLY valid JSON. No markdown, no code fences, no text before or after. Just the JSON object:
+
 ```json
 {
-  "assetType": "offer",
-  "overall": 8.2,
-  "verdict": "PASS",
-  "dimensions": [
-    {
-      "name": "Dream Outcome",
-      "score": 9,
-      "reason": "Specific one-line reason citing what works or doesn't",
-      "sourceFramework": "Value Equation — top left variable"
-    }
+  "overall": 7.2,
+  "verdict": "NEEDS WORK",
+  "scores": [
+    { "name": "Dream Outcome", "score": 8, "reason": "one-line reason", "framework": "Value Equation" },
+    { "name": "Perceived Likelihood", "score": 6, "reason": "one-line reason", "framework": "Value Equation" },
+    { "name": "Time to Result", "score": 7, "reason": "one-line reason", "framework": "Value Equation" },
+    { "name": "Effort Required", "score": 8, "reason": "one-line reason", "framework": "Value Equation" },
+    { "name": "Problem Coverage", "score": 7, "reason": "one-line reason", "framework": "Grand Slam Step 2" },
+    { "name": "Value Stack", "score": 7, "reason": "one-line reason", "framework": "Grand Slam Step 5" },
+    { "name": "Naming (MAGIC)", "score": 5, "reason": "one-line reason", "framework": "MAGIC Formula" },
+    { "name": "Guarantee", "score": 8, "reason": "one-line reason", "framework": "Guarantee chapter" },
+    { "name": "Scarcity & Urgency", "score": 6, "reason": "one-line reason", "framework": "Scarcity chapter" },
+    { "name": "Price Anchoring", "score": 7, "reason": "one-line reason", "framework": "$100M Offers, pricing" },
+    { "name": "Bonuses", "score": 6, "reason": "one-line reason", "framework": "11 Bonus Rules" }
   ],
+  "strengths": ["what works well — cite framework"],
   "gaps": [
-    {
-      "dimension": "Perceived Likelihood",
-      "score": 6,
-      "problem": "What specifically is wrong — be concrete",
-      "fix": "Exact rewritten text or specific action. Not 'add more proof' but the actual proof sentence to add.",
-      "sourceFramework": "Value Equation — 'People pay for certainty'"
-    }
+    { "dimension": "Name", "score": 5, "framework": "source", "problem": "what's wrong", "fix": "exact rewritten text" }
   ],
-  "violations": [
-    {
-      "violation": "What was found",
-      "source": "Which book/chapter says this is wrong",
-      "deduction": "What score was affected and by how much"
-    }
-  ],
-  "strengths": [
-    "Top 2-3 things this offer does well — cite the framework each maps to"
-  ],
-  "oneThingToFix": "The single highest-leverage change. Specific. Actionable. With the exact rewritten text if applicable.",
-  "regenerateWith": {
-    "suggestion": "If the user wants to regenerate via the Offer Creator, here's what to change in the input fields",
-    "fieldsToChange": [
-      {"field": "proof", "currentIssue": "...", "suggestedInput": "..."}
-    ]
-  }
+  "violations": ["violation — source — score affected"],
+  "oneThing": "The single highest-leverage change with exact rewritten text."
 }
 ```
 
@@ -114,4 +99,4 @@ Return JSON:
 4. Score the offer AS PRESENTED — don't assume information that isn't there
 5. If critical information is missing (no price, no niche, no guarantee), note it as a gap but don't guess
 6. The `regenerateWith` field connects the audit back to the Offer Creator tool — tells the user exactly what to change in their inputs to improve the score
-7. Never invent criteria. If it's not in $100M Offers, $100M Pricing Playbook, or the explicitly cited frameworks, don't score on it
+7. Never invent criteria. If it's not in $100M Offers or the explicitly cited frameworks, don't score on it

@@ -39,11 +39,10 @@ export async function chatRoute(req: Request, res: Response) {
   ]
 
   const MODEL_MAP: Record<string, string> = {
-    haiku: 'claude-haiku-4-5',
     sonnet: 'claude-sonnet-4-6',
     opus: 'claude-opus-4-6',
   }
-  const modelId = MODEL_MAP[model] || 'claude-haiku-4-5'
+  const modelId = MODEL_MAP[model] || 'claude-sonnet-4-6'
 
   // Set up SSE
   res.setHeader('Content-Type', 'text/event-stream')

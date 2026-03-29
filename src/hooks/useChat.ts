@@ -1,11 +1,13 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { streamChat } from '../api/chat'
 import type { Message, ToolType } from '../api/chat'
 
 export function useChat(tool: ToolType) {
   const [messages, setMessages] = useState<Message[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
-  const [model, setModel] = useState<'haiku' | 'sonnet' | 'opus'>('haiku')
+  const [model, setModel] = useState<'sonnet' | 'opus'>('sonnet')
+  const messagesRef = useRef<Message[]>([])
+  messagesRef.current = messages
 
   const sendMessage = useCallback(async (text: string) => {
     const userMsg: Message = { role: 'user', content: text }
@@ -17,7 +19,7 @@ export function useChat(tool: ToolType) {
 
     await streamChat(
       tool,
-      messages,
+      messagesRef.current,
       text,
       model,
       (chunk) => {
@@ -39,11 +41,11 @@ export function useChat(tool: ToolType) {
         setIsStreaming(false)
       },
     )
-  }, [tool, messages, model])
+  }, [tool, model])
 
   const resetChat = useCallback(() => {
     setMessages([])
   }, [])
 
-  return { messages, isStreaming, model, setModel, sendMessage, resetChat }
+  return { messages, isStreaming, model, setModel, sendMessage, resetChat, setMessages }
 }

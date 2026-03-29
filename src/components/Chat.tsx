@@ -19,8 +19,8 @@ export function Chat({ messages, isStreaming, onSend, toolLabel, itemName }: Cha
   }, [messages])
 
   useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
+    if (!isStreaming) inputRef.current?.focus()
+  }, [isStreaming])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -45,13 +45,6 @@ export function Chat({ messages, isStreaming, onSend, toolLabel, itemName }: Cha
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-xl mx-auto px-5 py-6 space-y-5">
-          {messages.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-sm text-white/40">Start the conversation to build your {toolLabel.toLowerCase()}.</p>
-              <p className="text-xs text-white/25 mt-2">The AI will guide you through each section step by step.</p>
-            </div>
-          )}
-
           {messages.map((msg, i) => (
             <div key={i} className={`animate-[fadeIn_0.25s_ease-out] ${msg.role === 'user' ? 'ml-8' : ''}`}>
               {msg.role === 'user' ? (
@@ -82,8 +75,8 @@ export function Chat({ messages, isStreaming, onSend, toolLabel, itemName }: Cha
                           </div>
                         )
                       }
-                      // Regular text — handle bold markers
-                      return <span key={j}>{renderText(part)}</span>
+                      // Regular text — handle blockquotes, lists, bold
+                      return <span key={j}>{renderBlock(part)}</span>
                     })}
                     {isStreaming && i === messages.length - 1 && (
                       <span className="text-violet-500/50 animate-pulse">|</span>
@@ -134,8 +127,48 @@ export function Chat({ messages, isStreaming, onSend, toolLabel, itemName }: Cha
   )
 }
 
+function renderBlock(text: string) {
+  const lines = text.split('\n')
+  const blocks: { type: 'quote' | 'list' | 'text'; lines: string[] }[] = []
+
+  for (const line of lines) {
+    const trimmed = line.trimStart()
+    let type: 'quote' | 'list' | 'text' = 'text'
+    if (trimmed.startsWith('> ') || trimmed === '>') type = 'quote'
+    else if (/^[-*•]\s/.test(trimmed)) type = 'list'
+
+    const last = blocks[blocks.length - 1]
+    if (last && last.type === type) {
+      last.lines.push(line)
+    } else {
+      blocks.push({ type, lines: [line] })
+    }
+  }
+
+  return blocks.map((block, i) => {
+    if (block.type === 'quote') {
+      return (
+        <div key={i} className="border-l-2 border-violet-500/40 pl-3 my-2 text-white/80">
+          {block.lines.map((l, j) => (
+            <div key={j}>{renderText(l.replace(/^\s*>\s?/, ''))}</div>
+          ))}
+        </div>
+      )
+    }
+    if (block.type === 'list') {
+      return (
+        <ul key={i} className="list-disc list-inside my-2 space-y-0.5">
+          {block.lines.map((l, j) => (
+            <li key={j}>{renderText(l.replace(/^\s*[-*•]\s/, ''))}</li>
+          ))}
+        </ul>
+      )
+    }
+    return <span key={i}>{renderText(block.lines.join('\n'))}</span>
+  })
+}
+
 function renderText(text: string) {
-  // Simple bold rendering for **text**
   const parts = text.split(/\*\*(.*?)\*\*/g)
   return parts.map((part, i) =>
     i % 2 === 1

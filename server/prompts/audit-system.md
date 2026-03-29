@@ -80,26 +80,30 @@ Flag immediately if found:
 
 ## OUTPUT FORMAT
 
-Return JSON:
+Return ONLY valid JSON. No markdown, no code fences, no text before or after. Just the JSON object.
+
+Use the dimensions from the matching rubric (Offer = 9 dimensions, Script = 8 dimensions, VSL = 8 dimensions).
+
 ```json
 {
-  "assetType": "offer|script|vsl",
-  "overall": 8.2,
-  "verdict": "PASS|NEEDS_WORK|FAIL",
-  "dimensions": [
-    {"name": "Dream Outcome", "score": 9, "reason": "One-line specific reason"}
+  "overall": 7.2,
+  "verdict": "NEEDS WORK",
+  "scores": [
+    { "name": "Dimension Name", "score": 8, "reason": "one-line reason" }
   ],
+  "strengths": ["what works well — cite framework"],
   "gaps": [
-    {
-      "dimension": "Perceived Likelihood",
-      "score": 6,
-      "problem": "What specifically is wrong",
-      "fix": "Exact rewritten text or specific action to take"
-    }
+    { "dimension": "Name", "score": 5, "problem": "what's wrong", "fix": "exact rewritten text or action" }
   ],
-  "violations": ["Free trial offered — remove and replace with conditional guarantee"],
-  "oneThingToFix": "The single highest-leverage change. Specific. Actionable. Now."
+  "violations": ["violation and what to do about it"],
+  "oneThing": "The single highest-leverage change. Specific. Actionable."
 }
 ```
 
-Verdict: PASS = overall >= 8. NEEDS_WORK = 6-7.9. FAIL = below 6.
+**Offer dimensions:** Dream Outcome, Perceived Likelihood, Time to Result, Effort Required, Value Stack, Naming (MAGIC), Guarantee, Scarcity, Price Anchoring
+
+**Script dimensions:** Rapport & Opening, Pain Discovery, Past Attempts, Value Presentation, Objection Handling, Closing Technique, Follow-up System, Framework Compliance
+
+**VSL dimensions:** Hook Strength, Problem Agitation, Credibility, Mechanism Clarity, Value Stack Power, CTA Clarity, Tone & Delivery, Pacing & Structure
+
+Verdict: PASS = overall >= 8. NEEDS WORK = 6-7.9. FAIL = below 6.

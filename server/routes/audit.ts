@@ -30,14 +30,19 @@ export async function auditRoute(req: Request, res: Response) {
     : auditPrompt
 
   const MODEL_MAP: Record<string, string> = {
-    haiku: 'claude-haiku-4-5',
     sonnet: 'claude-sonnet-4-6',
     opus: 'claude-opus-4-6',
   }
-  const modelId = MODEL_MAP[model] || 'claude-haiku-4-5'
+  const modelId = MODEL_MAP[model] || 'claude-sonnet-4-6'
+
+  // SSE streaming
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
+  res.flushHeaders()
 
   try {
-    const response = await client.messages.create({
+    const stream = await client.messages.stream({
       model: modelId,
       max_tokens: 4096,
       system: systemPrompt,
@@ -49,10 +54,17 @@ export async function auditRoute(req: Request, res: Response) {
       ],
     })
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : ''
-    res.json({ audit: text })
+    for await (const event of stream) {
+      if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+        res.write(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`)
+      }
+    }
+
+    res.write('data: [DONE]\n\n')
+    res.end()
   } catch (error: any) {
     console.error('Audit error:', error.message)
-    res.status(500).json({ error: error.message })
+    res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`)
+    res.end()
   }
 }

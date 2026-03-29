@@ -90,13 +90,13 @@ Name your guarantee something memorable. Jason Fladlien has seen guarantees 2-4x
 
 ## PRICING RULES
 
-- Value-based only. Never cost-plus or competitor-matching. (Source: $100M Pricing Playbook — three pricing models, value-based is the target)
+- Value-based only. Never cost-plus or competitor-matching. Three pricing models exist; value-based is the target. (Source: $100M Offers)
 - Optimize for lifetime gross profit, not first purchase
 - Close rate >50% = raise prices. Full capacity = raise prices
-- Name pricing tiers after aspirational titles the customer wants for themselves. (Source: $100M Pricing Playbook)
+- Name pricing tiers after aspirational titles the customer wants for themselves
 - Never discount — add bonuses instead
 - Higher prices = fewer customers but more money AND better customers
-- "Believe in your price. If you don't, make the product better." (Source: $100M Pricing Playbook)
+- "Believe in your price. If you don't, make the product better."
 
 ## NAMING — MAGIC FORMULA (Source: $100M Offers, Chapter 16)
 

@@ -1,34 +1,38 @@
 import type { SavedItem } from '../api/storage'
-import { getItems, createItem, deleteItem } from '../api/storage'
+import { createItem, deleteItem } from '../api/storage'
 import type { ToolType } from '../api/chat'
 
 interface SidebarProps {
   activeId: string | null
+  items: SavedItem[]
   onSelect: (id: string) => void
   onNew: (item: SavedItem) => void
   onDelete: (id: string) => void
-  model: 'haiku' | 'sonnet' | 'opus'
-  onModelChange: (m: 'haiku' | 'sonnet' | 'opus') => void
-  refreshKey: number
+  model: 'sonnet' | 'opus'
+  onModelChange: (m: 'sonnet' | 'opus') => void
+  onShowRoadmap: () => void
 }
 
-export function Sidebar({ activeId, onSelect, onNew, onDelete, model, onModelChange, refreshKey }: SidebarProps) {
-  const items = getItems()
+export function Sidebar({ activeId, items, onSelect, onNew, onDelete, model, onModelChange, onShowRoadmap }: SidebarProps) {
   const offers = items.filter(i => i.type === 'offer')
   const scripts = items.filter(i => i.type === 'script')
   const vsls = items.filter(i => i.type === 'vsl')
 
-  // force re-read when refreshKey changes
-  void refreshKey
-
-  function handleNew(type: ToolType) {
+  async function handleNew(type: ToolType) {
     const names: Record<ToolType, string> = {
       offer: `Offer ${offers.length + 1}`,
       script: `Script ${scripts.length + 1}`,
       vsl: `VSL ${vsls.length + 1}`,
     }
-    const item = createItem(type, names[type])
+    const item = await createItem(type, names[type])
     onNew(item)
+  }
+
+  async function handleDelete(id: string, name: string) {
+    if (confirm(`Delete "${name}"?`)) {
+      await deleteItem(id)
+      onDelete(id)
+    }
   }
 
   function renderGroup(title: string, groupItems: SavedItem[], type: ToolType) {
@@ -54,10 +58,7 @@ export function Sidebar({ activeId, onSelect, onNew, onDelete, model, onModelCha
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                if (confirm(`Delete "${item.name}"?`)) {
-                  deleteItem(item.id)
-                  onDelete(item.id)
-                }
+                handleDelete(item.id, item.name)
               }}
               className="opacity-0 group-hover:opacity-100 shrink-0 w-6 h-6 flex items-center justify-center text-white/20 hover:text-red-400/70 transition-all"
               title="Delete"
@@ -98,11 +99,24 @@ export function Sidebar({ activeId, onSelect, onNew, onDelete, model, onModelCha
         <button onClick={() => handleNew('vsl')} className="w-full text-left px-3 py-1.5 rounded-lg text-[11px] text-white/25 hover:text-white/50 hover:bg-white/[0.02] transition-colors">+ New VSL</button>
       </div>
 
+      {/* Roadmap link */}
+      <div className="px-2 py-2 border-t border-white/[0.04]">
+        <button
+          onClick={onShowRoadmap}
+          className="w-full text-left px-3 py-1.5 rounded-lg text-[11px] text-white/25 hover:text-white/50 hover:bg-white/[0.02] transition-colors flex items-center gap-2"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
+          </svg>
+          Product Roadmap
+        </button>
+      </div>
+
       {/* Model */}
       <div className="px-3 py-3 border-t border-white/[0.04]">
         <div className="flex items-center gap-1.5">
           <span className="text-[9px] text-white/15">Model</span>
-          {(['haiku', 'sonnet', 'opus'] as const).map(m => (
+          {(['sonnet', 'opus'] as const).map(m => (
             <button
               key={m}
               onClick={() => onModelChange(m)}
