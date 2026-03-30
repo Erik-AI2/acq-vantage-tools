@@ -25,19 +25,34 @@ interface OutputPanelProps {
 
 function parseAudit(raw: string): AuditData | null {
   try {
+    let parsed: any = null
+
     // Try direct parse first
     const trimmed = raw.trim()
-    if (trimmed.startsWith('{')) return JSON.parse(trimmed)
+    if (trimmed.startsWith('{')) parsed = JSON.parse(trimmed)
 
     // Strip markdown code fences
-    const fenceStrip = trimmed.replace(/^```json?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim()
-    if (fenceStrip.startsWith('{')) return JSON.parse(fenceStrip)
+    if (!parsed) {
+      const fenceStrip = trimmed.replace(/^```json?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim()
+      if (fenceStrip.startsWith('{')) parsed = JSON.parse(fenceStrip)
+    }
 
-    // Extract JSON from anywhere in the text (handles preamble/postamble)
-    const jsonMatch = raw.match(/\{[\s\S]*"overall"[\s\S]*"scores"[\s\S]*\}/)
-    if (jsonMatch) return JSON.parse(jsonMatch[0])
+    // Extract JSON from anywhere in the text
+    if (!parsed) {
+      const jsonMatch = raw.match(/\{[\s\S]*"overall"[\s\S]*"scores"[\s\S]*\}/)
+      if (jsonMatch) parsed = JSON.parse(jsonMatch[0])
+    }
 
-    return null
+    // Validate required fields exist
+    if (!parsed || typeof parsed.overall !== 'number' || !Array.isArray(parsed.scores)) return null
+
+    // Ensure safe defaults for optional arrays
+    parsed.strengths = parsed.strengths || []
+    parsed.gaps = parsed.gaps || []
+    parsed.violations = parsed.violations || []
+    parsed.oneThing = parsed.oneThing || ''
+
+    return parsed as AuditData
   } catch {
     return null
   }
@@ -318,8 +333,11 @@ export function OutputPanel({ type, output, onOutputChange, model, width, itemId
       async () => {
         setIsAuditing(false)
         const parsed = parseAudit(fullText)
-        if (parsed) setAuditData(parsed)
-        if (itemId) await addAudit(itemId, fullText)
+        if (parsed) {
+          setAuditData(parsed)
+          // Only save valid audits to prevent corrupted data
+          if (itemId) await addAudit(itemId, fullText)
+        }
       },
       (error) => {
         setAuditRaw(`Error: ${error}`)
