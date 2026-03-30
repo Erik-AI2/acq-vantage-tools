@@ -63,40 +63,41 @@ These are explicitly against the frameworks. Flag if found:
 
 ## OUTPUT FORMAT
 
-Return ONLY valid JSON. No markdown, no code fences, no text before or after. Just the JSON object:
+Return ONLY valid JSON. No markdown, no code fences, no text before or after. Just the raw JSON object.
+
+CRITICAL: Keep ALL text fields SHORT. Reasons must be ONE sentence (under 15 words). Fixes must be ONE sentence. Strengths must be ONE phrase each. The entire JSON must be under 3000 characters.
 
 ```json
 {
   "overall": 7.2,
   "verdict": "NEEDS WORK",
   "scores": [
-    { "name": "Dream Outcome", "score": 8, "reason": "one-line reason", "framework": "Value Equation" },
-    { "name": "Perceived Likelihood", "score": 6, "reason": "one-line reason", "framework": "Value Equation" },
-    { "name": "Time to Result", "score": 7, "reason": "one-line reason", "framework": "Value Equation" },
-    { "name": "Effort Required", "score": 8, "reason": "one-line reason", "framework": "Value Equation" },
-    { "name": "Problem Coverage", "score": 7, "reason": "one-line reason", "framework": "Grand Slam Step 2" },
-    { "name": "Value Stack", "score": 7, "reason": "one-line reason", "framework": "Grand Slam Step 5" },
-    { "name": "Naming (MAGIC)", "score": 5, "reason": "one-line reason", "framework": "MAGIC Formula" },
-    { "name": "Guarantee", "score": 8, "reason": "one-line reason", "framework": "Guarantee chapter" },
-    { "name": "Scarcity & Urgency", "score": 6, "reason": "one-line reason", "framework": "Scarcity chapter" },
-    { "name": "Price Anchoring", "score": 7, "reason": "one-line reason", "framework": "$100M Offers, pricing" },
-    { "name": "Bonuses", "score": 6, "reason": "one-line reason", "framework": "11 Bonus Rules" }
+    { "name": "Dream Outcome", "score": 8, "reason": "Specific and measurable with timeframe" },
+    { "name": "Perceived Likelihood", "score": 6, "reason": "Some proof but no named case studies" },
+    { "name": "Time to Result", "score": 7, "reason": "Clear milestones but no immediate win" },
+    { "name": "Effort Required", "score": 8, "reason": "Done-with-you model, low friction" },
+    { "name": "Problem Coverage", "score": 7, "reason": "Good breadth but misses post-purchase" },
+    { "name": "Value Stack", "score": 7, "reason": "Named items but missing dollar anchors" },
+    { "name": "Naming (MAGIC)", "score": 5, "reason": "Generic name, no avatar or timeframe" },
+    { "name": "Guarantee", "score": 8, "reason": "Outcome-based with clear timeline" },
+    { "name": "Scarcity & Urgency", "score": 6, "reason": "No real deadline or capacity limit" },
+    { "name": "Price Anchoring", "score": 7, "reason": "Compared to alternatives but no daily reframe" },
+    { "name": "Bonuses", "score": 6, "reason": "Present but unnamed and unvalued" }
   ],
-  "strengths": ["what works well — cite framework"],
+  "strengths": ["Strong value equation", "Clear target market"],
   "gaps": [
-    { "dimension": "Name", "score": 5, "framework": "source", "problem": "what's wrong", "fix": "exact rewritten text" }
+    { "dimension": "Naming", "score": 5, "problem": "Generic name", "fix": "Use MAGIC: avatar + goal + timeframe" }
   ],
-  "violations": ["violation — source — score affected"],
-  "oneThing": "The single highest-leverage change with exact rewritten text."
+  "violations": [],
+  "oneThing": "Add a named, outcome-based guarantee with specific timeline"
 }
 ```
 
 ## RULES
 
-1. Every score must cite its source framework. "Dream Outcome: 7/10 (Value Equation — top left)" not just "7/10"
-2. Every fix must be SPECIFIC — rewritten text, not advice. "Add: 'Agency X saved 40 hrs/month within 48 hours'" not "add a testimonial"
-3. If the offer is genuinely strong, say so. Don't manufacture problems
-4. Score the offer AS PRESENTED — don't assume information that isn't there
-5. If critical information is missing (no price, no niche, no guarantee), note it as a gap but don't guess
-6. The `regenerateWith` field connects the audit back to the Offer Creator tool — tells the user exactly what to change in their inputs to improve the score
-7. Never invent criteria. If it's not in $100M Offers or the explicitly cited frameworks, don't score on it
+1. KEEP IT SHORT. Every reason field is ONE sentence, under 15 words. No paragraphs.
+2. Maximum 3 gaps. Only the most important ones.
+3. Maximum 3 strengths. Brief phrases, not sentences.
+4. Score the offer AS PRESENTED — don't assume missing information
+5. If genuinely strong, say so. Don't manufacture problems
+6. Never invent criteria outside $100M Offers frameworks
