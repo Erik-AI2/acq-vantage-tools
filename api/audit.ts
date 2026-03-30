@@ -39,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const stream = await client.messages.stream({
       model: modelId,
-      max_tokens: 4096,
+      max_tokens: 8192,
       system: systemPrompt,
       messages: [
         {
