@@ -138,7 +138,7 @@ function Scorecard({ data }: { data: AuditData }) {
           {data.violations.map((v, i) => (
             <p key={i} className="text-xs text-red-400/70 leading-relaxed mb-1 flex gap-1.5">
               <span className="shrink-0">!</span>
-              <span>{v}</span>
+              <span>{typeof v === 'string' ? v : (v as any).detail || (v as any).rule || JSON.stringify(v)}</span>
             </p>
           ))}
         </div>
