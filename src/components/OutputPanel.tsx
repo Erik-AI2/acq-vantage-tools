@@ -25,9 +25,19 @@ interface OutputPanelProps {
 
 function parseAudit(raw: string): AuditData | null {
   try {
-    // Strip markdown code fences if present
-    const cleaned = raw.replace(/^```json?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim()
-    return JSON.parse(cleaned)
+    // Try direct parse first
+    const trimmed = raw.trim()
+    if (trimmed.startsWith('{')) return JSON.parse(trimmed)
+
+    // Strip markdown code fences
+    const fenceStrip = trimmed.replace(/^```json?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim()
+    if (fenceStrip.startsWith('{')) return JSON.parse(fenceStrip)
+
+    // Extract JSON from anywhere in the text (handles preamble/postamble)
+    const jsonMatch = raw.match(/\{[\s\S]*"overall"[\s\S]*"scores"[\s\S]*\}/)
+    if (jsonMatch) return JSON.parse(jsonMatch[0])
+
+    return null
   } catch {
     return null
   }

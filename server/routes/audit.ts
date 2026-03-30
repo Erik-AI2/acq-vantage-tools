@@ -25,9 +25,9 @@ export async function auditRoute(req: Request, res: Response) {
     return
   }
 
-  const systemPrompt = type === 'offer'
-    ? `${auditPrompt}\n\n---\n\n${offerReviewPrompt}`
-    : auditPrompt
+  // Offers use dedicated offer-review prompt (11 dimensions)
+  // Scripts/VSLs use general audit prompt (8 dimensions each)
+  const systemPrompt = type === 'offer' ? offerReviewPrompt : auditPrompt
 
   const MODEL_MAP: Record<string, string> = {
     sonnet: 'claude-sonnet-4-6',
